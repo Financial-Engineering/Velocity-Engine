@@ -1,0 +1,33 @@
+template MCEuropean;
+
+using process::black;
+using random::sobol;
+using distribution::lognormal;
+using variant::antithetic;
+
+var S = [100 105];
+var K("STRIKE") = 100;
+
+var VOL("sigma") = [.20 .30];
+var R = 0.05;
+var T = 1;
+
+var SEED = 2;
+var N = 65535;
+
+%S(0) =  lognormal(ICMG, Pseudo, SEED, N);
+%S(1) =  lognormal(ICMG, Pseudo, SEED, N);
+
+[payoff]
+function [p]=payoff(S,K)
+    if (S > K*1.05)
+   	    p=max(S-K,0);
+   	else
+   	    p=0;
+   	end
+end
+
+function pi(y)
+    var x=3.1415926535;
+    y(1)=x;
+end

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="razorcompiler" default="all">
+
+    <property file="build.properties"/>
+
+    <!-- Compiler options -->
+
+    <property name="compiler.debug" value="on"/>
+    <property name="compiler.generate.no.warnings" value="off"/>
+    <property name="compiler.args" value=""/>
+    <property name="compiler.max.memory" value="128m"/>
+
+    <patternset id="compiler.resources">
+        <include name="**/?*.properties"/>
+        <include name="**/?*.xml"/>
+    </patternset>
+
+    <!-- JDK definitions -->
+
+    <property name="jdk.bin.1.6" value="${jdk.home.1.6}/bin"/>
+
+	<property name="project.jdk.home" value="${jdk.home.1.6}"/>
+    <property name="project.jdk.bin" value="${jdk.bin.1.6}"/>
+    <property name="project.jdk.classpath" value="jdk.classpath.1.6"/>
+
+    <!-- Project Libraries -->
+
+    <path id="library.antlr_3.1.classpath">
+        <fileset dir="${basedir}/lib"/>
+    </path>
+
+   <!-- Modules -->
+
+    <!-- Module RazorCompiler -->
+
+    <dirname property="razorcompiler.basedir" file="${ant.file}"/>
+
+    <property name="jdk.home.razorcompiler" value="${project.jdk.home}"/>
+    <property name="jdk.bin.razorcompiler" value="${project.jdk.bin}"/>
+    <property name="jdk.classpath.razorcompiler" value="${project.jdk.classpath}"/>
+
+    <property name="compiler.args.razorcompiler" value="${compiler.args}"/>
+
+    <property name="razorcompiler.src.dir" value="${razorcompiler.basedir}/src"/>
+    <property name="razorcompiler.release.dir" value="${razorcompiler.src.dir}/Release"/>
+    <property name="razorcompiler.debug.dir" value="${razorcompiler.src.dir}/Debug"/>
+
+    <path id="razorcompiler.bootclasspath">
+        <!-- Paths to be included in compilation bootclasspath -->
+    </path>
+
+    <path id="razorcompiler.classpath">
+        <path refid="library.antlr_3.1.classpath"/>
+    </path>
+
+    <path id="razorcompiler.runtime.classpath">
+        <pathelement location="${razorcompiler.release.dir}"/>
+        <pathelement location="${razorcompiler.debug.dir}"/>
+        <path refid="library.antlr_3.1.classpath"/>
+    </path>
+
+    <patternset id="excluded.from.compilation.razorcompiler">
+        <exclude name="Debug/**"/>
+        <exclude name="Release/**"/>
+    </patternset>
+
+    <path id="razorcompiler.sourcepath">
+        <dirset dir="${razorcompiler.src.dir}"/>
+    </path>
+
+	<path id="razorcompiler.sourcepath.antlr">
+        <fileset dir="${razorcompiler.src.dir}">
+            <include name="*.g"/>
+        </fileset>
+    </path>
+
+    <target name="antlr" description="run antlr on grammar">
+        <echo message="antlr razor.g"/>
+      <antlr:ant-antlr3 xmlns:antlr="antlib:org/apache/tools/ant/antlr"
+                      target="${razorcompiler.src.dir}/Razor.g"
+                      outputdirectory="${razorcompiler.src.dir}"
+                      libdirectory="${razorcompiler.src.dir}"
+                      multithreaded="true"
+                      report="false"
+                      depend="true">
+            <classpath>
+                <path refid="razorcompiler.runtime.classpath"/>
+            </classpath>
+        </antlr:ant-antlr3>
+      <antlr:ant-antlr3 xmlns:antlr="antlib:org/apache/tools/ant/antlr"
+                      target="${razorcompiler.src.dir}/RazorTree.g"
+                      outputdirectory="${razorcompiler.src.dir}"
+                      libdirectory="${razorcompiler.src.dir}"
+                      multithreaded="true"
+                      report="false"
+                      depend="true">
+            <classpath>
+                <path refid="razorcompiler.runtime.classpath"/>
+            </classpath>
+        </antlr:ant-antlr3>
+    </target>
+
+    <target name="razorcompiler" depends="antlr,release,debug"
+            description="Compile module. RazorCompiler"/>
+
+    <target name="release" description="Compile module. RazorCompiler; production classes">
+        <mkdir dir="${razorcompiler.release.dir}"/>
+
+        <javac destdir="${razorcompiler.release.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}"
+               memorymaximumsize="${compiler.max.memory}" fork="true"
+               executable="${jdk.bin.razorcompiler}/javac">
+            <compilerarg line="${compiler.args.razorcompiler}"/>
+            <bootclasspath refid="razorcompiler.bootclasspath"/>
+            <classpath refid="razorcompiler.classpath"/>
+            <src refid="razorcompiler.sourcepath"/>
+            <patternset refid="excluded.from.compilation.razorcompiler"/>
+        </javac>
+
+        <copy todir="${razorcompiler.release.dir}">
+            <fileset dir="${razorcompiler.basedir}/src">
+                <patternset refid="compiler.resources"/>
+                <type type="file"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="debug" depends="release" description="compile module. RazorCompiler; test classes"
+            unless="skip.tests"/>
+
+    <target name="jar" depends="release" description="build jar file">
+    	<unjar dest="${razorcompiler.release.dir}">
+    		<fileset dir="${razorcompiler.basedir}/lib"/>
+    	</unjar>
+
+        <jar destfile="${razorcompiler.basedir}/bin/razorcompiler.jar" basedir="${razorcompiler.release.dir}" compress="true" level="9">
+            <manifest>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Implementation-Vendor" value="Razor Risk Technologies Ltd."/>
+                <attribute name="Implementation-Title" value="Razor Compiler"/>
+                <attribute name="Implementation-Version" value="1.0"/>
+                <attribute name="Main-Class" value="RazorCompiler"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="clean" description="cleanup ">
+        <delete dir="${razorcompiler.release.dir}"/>
+        <delete dir="${razorcompiler.debug.dir}"/>
+        <delete>
+            <fileset dir="${razorcompiler.src.dir}"
+                     excludes="**/RazorCompiler.*,**/NoSuchPropertyException.*,**/DLLCompilerException.*,**/*.g,**/archive_projects/*"/>
+        </delete>
+    </target>
+
+    <target name="init" description="Build initialization">
+        <!-- Perform any build initialization in this target -->
+    </target>
+
+    <target name="all" depends="init, clean, razorcompiler, jar" description="build all"/>
+</project>

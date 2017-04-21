@@ -1,0 +1,20 @@
+template MCEuropean;
+
+using process::black;
+
+extern S = [100 105];
+extern K("STRIKE") = 100;
+extern H = 105;
+extern T = 1;
+extern R = 0.05;
+extern VOL = .20;
+extern N = 65535;
+
+global SEED = 2;
+
+[payoff]
+function [p] = payoff(S,K)
+    for x=[1:N:-1]
+       p = max(S-K,0);
+    end
+end

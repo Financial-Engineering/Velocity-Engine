@@ -1,0 +1,72 @@
+group MCEuropean : Template;
+
+price(payoff,random,process) ::= <<
+
+/// Variables needed: S0,K,R,VOL,T,N
+#include "<procmap.(process)>.h"
+#include \<mkl_vsl.h\>
+#include \<mkl_vml.h\>
+
+const double <template>::price()
+{
+        this-\>bindVars();
+
+        VDouble s(BLOCK_SIZE);
+        VDouble p(BLOCK_SIZE);
+        VDouble psq(BLOCK_SIZE);
+        SVDouble k(BLOCK_SIZE,K(0));
+
+    	int iNBlocks = (int)N[0] / BLOCK_SIZE;
+    	int iNTail = (int)N[0] - iNBlocks*BLOCK_SIZE;
+
+    	VSLStreamStatePtr stream;
+    	vslNewStream( &stream, <ranmap.(random)>, (int)SEED[0]);
+
+        <procmap.(process)> process(R(0), 0.0, VOL(0), T(0));
+
+        double A = process.drift();
+        double Sigma = process.stdDeviation();
+        double B = 0;
+        double Beta = S[0];
+
+		double sum=0.0;
+		double sumsq=0.0;
+
+		for (int i = 0; i \< iNBlocks; i++ )
+		{
+			vdRngLognormal( VSL_METHOD_DLOGNORMAL_ICDF, stream,
+				BLOCK_SIZE, &s[0], A, Sigma, 0, Beta);
+
+			<payoff>(s,k,p);
+			sum += blas::asum(p);
+
+			vdMul(BLOCK_SIZE,&p[0],&p[0],&psq[0]);
+			sumsq += blas::asum(psq);
+		}
+		{
+			s.resize(iNTail,false);
+			p.resize(iNTail,false);
+			psq.resize(iNTail,false);
+			k.resize(iNTail,true);
+
+			vdRngLognormal( VSL_METHOD_DLOGNORMAL_ICDF, stream,
+				iNTail, &s[0], A, Sigma, 0, Beta);
+
+			<payoff>(s,k,p);
+			sum += blas::asum(p);
+
+			vdMul(iNTail,&p[0],&p[0],&psq[0]);
+			sumsq += blas::asum(psq);
+		}
+
+		double payout = exp(-R(0)*T(0))*(sum / N(0));
+		double std = sqrt((sumsq-sum*sum/N(0))*exp(-2*R(0)*T(0))/(N(0)-1.0));
+		double serr = std/sqrt(N(0)-1.0);
+
+    	vslDeleteStream( &stream );
+
+    	this->_stdErr = serr;
+    	return payout;
+}
+>>
+

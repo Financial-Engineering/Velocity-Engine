@@ -1,0 +1,21 @@
+template MCEuroSpread;
+
+using process::black;   % replace with black2d
+using random::sobol;
+using distribution::lognormal;
+using variant::antithetic;
+
+extern S = [100 105];
+extern K("STRIKE") = 3;
+extern VOL("sigma") = [.20 .30];
+extern rho = 0.5;
+
+extern R = [0.05 0.03];
+extern T = 1;
+extern SEED = 2;
+extern N = 65535;
+
+[payoff]
+function [p]=payoff(S1,S2,K)
+   p = max(S1-S2-K,0.0);
+end

@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/RiskProducts/!svn/ver/52414/razor/trunk/PricingAdapters/PAVelocityEngine
+END
+SPO_main.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/RiskProducts/!svn/ver/33202/razor/trunk/PricingAdapters/PAVelocityEngine/SPO_main.cpp
+END
+PAVelocityEngine.vcproj
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/RiskProducts/!svn/ver/39262/razor/trunk/PricingAdapters/PAVelocityEngine/PAVelocityEngine.vcproj
+END
+PricingCalculatorSPO.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/RiskProducts/!svn/ver/40529/razor/trunk/PricingAdapters/PAVelocityEngine/PricingCalculatorSPO.cpp
+END
+PricingCalculatorSPO.h
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/RiskProducts/!svn/ver/40529/razor/trunk/PricingAdapters/PAVelocityEngine/PricingCalculatorSPO.h
+END

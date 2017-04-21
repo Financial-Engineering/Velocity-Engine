@@ -1,0 +1,126 @@
+group Razor;
+
+function(name,args,rets,locals,stats) ::= <<
+<if (rets)>VDouble&<else>void<endif> <name>(<args:{p|const VDouble& <p>}; separator=", "><if (args)><if (rets)>,<endif><endif><rets:{p|VDouble& <p>=*(new VDouble())}; separator=", ">)
+{
+    <locals:varDecl()>
+    <strip(stats)>
+    <if (rets)>return <first(rets)>;<endif>
+}
+>>
+
+funcall(name,exprs) ::= <<<name>(<exprs; separator=",">)>>
+
+methodcall(name,exprs) ::= << <exprs>.size()>>
+
+statement(expr) ::= <<
+<expr>;
+
+>>
+
+statementList(locals, stats) ::= <<
+<stats: statement()>
+>>
+
+for(var,e1,e2,e3,stats) ::= <<
+for (int <var>=<e1>; <var>\<<e2>; <var>+=<if(e3)><e3><else>1<endif>)
+{
+    <stats>
+}
+>>
+
+for2(var,seq,stats) ::= <<
+for (assign(<var>,<e1>); boolean(lt(<var>,<e2>)); <var>+=<if(e3)><e3><else>1<endif>)
+{
+    <stats>
+}
+>>
+
+if(e1,s1,s2) ::= <<
+if (boolean(<e1>)) {
+    <s1>
+}
+else {
+    <s2>
+}
+>>
+
+while(e1,s1) ::= <<
+while (boolean(<e1>)) {
+    <s1>
+}
+>>
+
+
+assign(id,e1) ::= "assign(<id>,<e1>)"
+
+assignary(id,e1) ::= <<
+<id> = VDouble(1,<e1>);
+>>
+
+equals(left,right) ::= "<left> == <right>"
+
+eq(e1,e2) ::= "eq(<e1>,<e2>)"
+neq(e1,e2) ::= "neq(<e1>,<e2>)"
+lt(e1,e2) ::= "lt(<e1>,<e2>)"
+gt(e1,e2) ::= "gt(<e1>,<e2>)"
+lte(e1,e2) ::= "lte(<e1>,<e2>)"
+gte(e1,e2) ::= "gte(<e1>,<e2>)"
+
+or(e1,e2) ::= "(<e1>||<e2>)"
+and(e1,e2) ::= "<e1>&&<e2>"
+not(e1) ::= "~(<e1>)"
+
+add(e1,e2) ::= "add(<e1>,<e2>)"
+sub(e1,e2) ::= "sub(<e1>,<e2>)"
+mul(e1,e2) ::= "prod(<e1>,<e2>)"
+div(e1,e2) ::= "div(<e1>,<e2>)"
+
+neg(el) ::= "-(<e1>)"
+
+pow(e1,e2) ::= "pow(<e1>,<e2>)"
+
+loopstmt(st) ::= "<st>"
+
+sequence(e1,e2,e3) ::= <<
+sequence(<e1>,<e2><if(e3)>,<e3><endif>)
+>>
+
+locvar(var,idx) ::= "<var><if(idx)>(<idx>)<endif>"
+globalvar(var,idx) ::= "this-><var><if(idx)>(<idx>)<endif>"
+extvar(var,idx) ::= "this-><var><if(idx)>(<idx>)<endif>"
+
+varDecl(var) ::= <<
+VDouble <var>;
+>>
+
+declvars(vars) ::= <<
+<vars.keys:{VDouble <it>;}; separator="\n">;
+>>
+
+vector(seq) ::= <<
+<length(seq)>,<seq; separator=",">
+>>
+
+bindvars(vars) ::= <<
+<vars.keys:{k| <k> = vars["<vars.(k).alias>"];}; separator="\n">
+>>
+
+initExterns(vars) ::= <<
+<vars.keys:vectorinit(var=it,alias=vars.(it).alias,initList=vars.(it).value)>
+>>
+
+vectorinit(var,alias,initList) ::= <<
+assign(<var>,<if(initList)><initList><else>0.0<endif>);
+vars["<alias>"]=<var>;
+
+>>
+
+initGlobals(vars) ::= <<
+<vars.keys:vectorinit2(var=it,initList=vars.(it))>
+>>
+
+vectorinit2(var,initList) ::= <<
+assign(<var>,<if(initList)><initList><else>0.0<endif>);
+
+>>

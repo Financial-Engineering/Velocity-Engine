@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+
+<project name="template" default="compile" xmlns:cpptasks="antlib:net.sf.antcontrib.cpptasks">
+
+<!--  <property name="template.name" value="MCEngine"/>  -->
+<!--   <property name="base.dir" value="."/> -->
+
+  <property name="msvc.dir" value="C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC"/>
+
+  <property name="intel.mkl.dir" value="C:\Program Files\Intel\MKL\10.0.3.021"/>
+  <property name="intel.inc.dir" value="${intel.mkl.dir}\include"/>
+  <property name="intel.lib.dir" value="${intel.mkl.dir}\ia32\lib"/>
+
+  <property name="boost.dir" value="C:\Boost"/>
+  <property name="boost.inc.dir" value="${boost.dir}\include\boost-1_35"/>
+
+  <cpptasks:compiler id="msvc-dll" name="msvc">
+    <cpptasks:compilerarg value="/Oi"/>
+    <cpptasks:compilerarg value="/Ox"/>
+    <cpptasks:compilerarg value="/arch:SSE2"/>
+    <cpptasks:compilerarg value="/GL"/>
+    <cpptasks:compilerarg value="/Gy"/>
+    <cpptasks:compilerarg value="/TP"/>
+    <cpptasks:compilerarg value="/FD"/>
+    <cpptasks:compilerarg value="/Fd&quot;vc90.pdb&quot;"/>
+    <cpptasks:compilerarg value="/Zi"/>
+    <defineset>
+      <define name=" WIN32"/>
+      <define name=" _WINDOWS"/>
+      <define name=" _USR_DLL"/>
+      <define name=" MCENGINE_EXPORTS"/>
+      <define name=" _WINDLL"/>
+      <define name=" _UNICODE"/>
+      <define name=" UNICODE"/>
+      <define name=" NDEBUG"/>
+    </defineset>
+  </cpptasks:compiler>
+
+    <cpptasks:compiler id="icl-dll" name="icl">
+      <cpptasks:compilerarg value="/O3"/>
+      <cpptasks:compilerarg value="/GL"/>
+      <cpptasks:compilerarg value="/Gy"/>
+      <cpptasks:compilerarg value="/TP"/>
+      <cpptasks:compilerarg value="/FD"/>
+      <cpptasks:compilerarg value="/Fd&quot;vc90.pdb&quot;"/>
+      <cpptasks:compilerarg value="/Zi"/>
+      <defineset>
+        <define name="WIN32"/>
+        <define name="_WINDOWS"/>
+        <define name="_USR_DLL"/>
+        <define name="MCENGINE_EXPORTS"/>
+        <define name="_WINDLL"/>
+        <define name="_UNICODE"/>
+        <define name="UNICODE"/>
+      </defineset>
+    </cpptasks:compiler>
+
+  <target name="pre-init">
+    <condition property="is-debug">
+      <isTrue value="${debug}"/>
+    </condition>
+  </target>
+
+  <target name="init">
+    <mkdir dir="${base.dir}/${template.name}"/>
+  </target>
+  
+  <target name="clean">
+      <delete>
+          <fileset dir="${base.dir}/${template.name}">
+            <exclude name="${template.name}.rz"/>
+            <exclude name="${template.name}.cpp"/>
+            <exclude name="${template.name}.dll"/>
+          </fileset>
+      </delete>
+  </target>
+
+  <target name="build" depends="init">
+    <cpptasks:cc name="msvc" outtype="shared" subsystem="console" 
+		 outfile="${base.dir}/${template.name}/${template.name}"
+		 runtime="dynamic" multithreaded="true" exceptions="true" objdir="${base.dir}/${template.name}"
+		 optimize="speed" debug="${debug}">
+
+      <includepath path=" ${boost.inc.dir} "/>
+      <includepath path=" ${intel.inc.dir} "/>
+      <includepath path=" ${base.dir} "/>
+
+      <cpptasks:compiler extends="msvc-dll">
+          <fileset dir="${base.dir}" includes="dllmain.cpp"/>
+          <fileset dir="${base.dir}/${template.name}" includes="${template.name}.cpp"/>
+      </cpptasks:compiler>
+
+      <precompile prototype="StdAfx.cpp">
+        <except>
+          <fileset dir="${base.dir}" includes="dllmain.cpp"/>
+        </except>
+      </precompile>
+
+      <cpptasks:linkerarg value="/LTCG"/>
+      <libset dir="${intel.lib.dir}" libs="mkl_c_dll,mkl_intel_c_dll,mkl_intel_thread_dll,mkl_core_dll,libguide40"/>
+    </cpptasks:cc>
+  </target>
+
+  <target name="compile" depends="build" />
+</project>

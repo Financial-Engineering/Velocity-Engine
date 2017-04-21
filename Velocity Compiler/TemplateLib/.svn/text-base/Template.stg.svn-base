@@ -1,0 +1,124 @@
+group Template : Razor;
+
+procmap ::= [
+    "black":"BlackScholesProcess",
+    "garman":"GarmanKolhaganProcess",
+    "vacicek":"VacicekProcess",
+    default:"BlackScholesProcess"
+]
+
+ranmap ::= [
+    "sobol":"VSL_BRNG_SOBOL",
+    "pseudo31":"VSL_BRNG_MCG31",
+    "pseudo59":"VSL_BRNG_MCG59",
+    "mersenne":"VSL_BRNG_MT19937",
+    "niederr":"VSL_BRNG_NIEDERR",
+    default:"VSL_BRNG_MCG31"
+]
+
+random(val) ::= <<
+    <ranmap.(val)>
+>>
+
+program(template,usings,externs,globals,stats,functions,price,payoff) ::= <<
+#include "stdafx.h"
+#include "Template.h"
+#include "Functions.h"
+
+#include \<math.h\>
+#include \<stdarg.h\>
+#include \<mkl_service.h\>
+
+const unsigned BLOCK_SIZE=1024;
+
+using namespace velocity;
+
+class <template> : public Template {
+private:
+    <declvars(globals)>
+protected:
+
+    <declvars(externs)>
+
+    <functions; separator="\n">
+
+    void bindVars() {
+        <bindvars(externs)>
+    }
+
+public:
+
+    <template>() {
+        <initExterns(externs)>
+        initGlobal();
+    }
+
+    ~<template>() {}
+
+    void initGlobal() {
+        _price = 0.0;
+        _stdErr = 0.0;
+         <initGlobals(globals)>
+        <stats>
+    }
+
+    const double price()<if (price)>{VDouble y; this-><price>(y); return y[0];}<else>;<endif>
+};
+
+<if (!price)>
+<price(payoff=payoff,random={<usings.("random")>},process={<usings.("process")>})>
+<endif>
+
+extern "C" __declspec(dllexport) Template* newTemplate()
+{
+    return (Template*) new <template>();
+}
+
+extern "C" __declspec(dllexport) void deleteTemplate(Template* tmpl)
+{
+    if (tmpl) delete tmpl;
+}
+
+extern "C" __declspec(dllexport) void setValue(Template* tmpl, const char* key,
+											   const double* val, const int size)
+{
+    VarTable& vars = tmpl-\>getVarTable();
+	vars[key].resize(size);
+	const int idx = 1;
+
+	dcopy(&size, val, &idx, &vars[key][0], &idx);
+}
+
+extern "C" __declspec(dllexport) double* getValue(Template* tmpl, const char* key)
+{
+    VarTable& vars = tmpl-\>getVarTable();
+    return &vars[key][0];
+}
+
+extern "C" __declspec(dllexport) char** getKeys(Template* tmpl, size_t& size)
+{
+    VarTable& vars = tmpl-\>getVarTable();
+
+	char** keys = new char*[vars.size()];
+
+	VarTable::iterator it;
+
+	size=0;
+	for ( it=vars.begin() ; it != vars.end(); it++ )
+		keys[size++] = const_cast\<char*\>(((*it).first).c_str());
+
+	return keys;
+}
+
+extern "C" __declspec(dllexport) double getPrice(Template* tmpl)
+{
+    return tmpl-\>price();
+}
+
+extern "C" __declspec(dllexport) double getError(Template* tmpl)
+{
+    return tmpl-\>_stdErr;
+}
+
+>>
+

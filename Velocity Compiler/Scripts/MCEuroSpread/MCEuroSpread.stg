@@ -1,0 +1,88 @@
+group MCEuroSpread : Template;
+
+price(payoff,random,process) ::= <<
+
+#include "<procmap.(process)>.h"
+#include \<mkl_vsl.h\>
+#include \<mkl_vml.h\>
+
+const double <template>::price()
+{
+        this-\>bindVars();
+
+        VDouble s1(BLOCK_SIZE);
+        VDouble s2(BLOCK_SIZE);
+        VDouble p(BLOCK_SIZE);
+        VDouble psq(BLOCK_SIZE);
+        SVDouble k(BLOCK_SIZE,K(0));
+
+    	int iNBlocks = (int)N[0] / BLOCK_SIZE;
+    	int iNTail = (int)N[0] - iNBlocks*BLOCK_SIZE;
+
+    	VSLStreamStatePtr stream;
+    	vslNewStream( &stream, <ranmap.(random)>, (int)SEED[0]);
+
+        <procmap.(process)> process1(R(0), 0.0, VOL(0), T(0));
+        <procmap.(process)> process2(R(1), 0.0, VOL(1), T(0));
+
+		double sum=0.0;
+		double sumsq=0.0;
+
+		double rho2=sqrt(1 - rho(0) * rho(0));
+        VDouble z1,z2;
+
+		for (int i = 0; i \< iNBlocks; i++ )
+		{
+    		vdRngGaussian( VSL_METHOD_DGAUSSIAN_ICDF, stream,
+    			BLOCK_SIZE, &s1(0), 0, 1);
+    		vdRngGaussian( VSL_METHOD_DGAUSSIAN_ICDF, stream,
+    			BLOCK_SIZE, &s2(0), 0, 1);
+
+		    z1 = s1;
+			z2 = add(prod(rho(0),z1),prod(rho2,s2));
+
+			s1 = prod(S(0),exp(add(prod(process1.diffusion(),T(0)),prod(process1.stdDeviation(),z1))));
+			s2 = prod(S(1),exp(add(prod(process2.diffusion(),T(0)),prod(process2.stdDeviation(),z2))));
+
+			<payoff>(s1,s2,k,p);
+			sum += blas::asum(p);
+
+			vdMul(BLOCK_SIZE,&p[0],&p[0],&psq[0]);
+			sumsq += blas::asum(psq);
+		}
+		{
+			s1.resize(iNTail,false);
+			s2.resize(iNTail,false);
+			p.resize(iNTail,false);
+			psq.resize(iNTail,false);
+			k.resize(iNTail,true);
+
+    		vdRngGaussian( VSL_METHOD_DGAUSSIAN_ICDF, stream,
+    			iNTail, &s1(0), 0, 1);
+    		vdRngGaussian( VSL_METHOD_DGAUSSIAN_ICDF, stream,
+    			iNTail, &s2(0), 0, 1);
+
+		    z1 = s1;
+			z2 = add(prod(rho(0),z1),prod(rho2,s2));
+
+			s1 = prod(S(0),exp(add(prod(process1.diffusion(),T(0)),prod(process1.stdDeviation(),z1))));
+			s2 = prod(S(1),exp(add(prod(process2.diffusion(),T(0)),prod(process2.stdDeviation(),z2))));
+
+			<payoff>(s1,s2,k,p);
+			sum += blas::asum(p);
+
+			vdMul(iNTail,&p[0],&p[0],&psq[0]);
+			sumsq += blas::asum(psq);
+		}
+
+		double payout = exp(-R(0)*T(0))*(sum / N(0));
+		double std = sqrt((sumsq-sum*sum/N(0))*exp(-2*R(0)*T(0))/(N(0)-1.0));
+		double serr = std/sqrt(N(0)-1.0);
+
+    	vslDeleteStream( &stream );
+
+    	this->_stdErr = serr;
+    	return payout;
+}
+>>
+

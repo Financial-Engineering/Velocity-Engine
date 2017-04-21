@@ -1,0 +1,89 @@
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/RiskProducts/!svn/ver/39262/razor/trunk/PricingAdapters/PAVelocityEngine/RazorCompiler/templateLib
+END
+stdafx.h
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/RiskProducts/!svn/ver/32759/razor/trunk/PricingAdapters/PAVelocityEngine/RazorCompiler/templateLib/stdafx.h
+END
+Template.h
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/RiskProducts/!svn/ver/33523/razor/trunk/PricingAdapters/PAVelocityEngine/RazorCompiler/templateLib/Template.h
+END
+dllmain.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/RiskProducts/!svn/ver/32759/razor/trunk/PricingAdapters/PAVelocityEngine/RazorCompiler/templateLib/dllmain.cpp
+END
+BlackScholesProcess.h
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/RiskProducts/!svn/ver/32759/razor/trunk/PricingAdapters/PAVelocityEngine/RazorCompiler/templateLib/BlackScholesProcess.h
+END
+TemplateDefs.h
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/RiskProducts/!svn/ver/32759/razor/trunk/PricingAdapters/PAVelocityEngine/RazorCompiler/templateLib/TemplateDefs.h
+END
+Template_sp.h
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/RiskProducts/!svn/ver/32759/razor/trunk/PricingAdapters/PAVelocityEngine/RazorCompiler/templateLib/Template_sp.h
+END
+Template.stg
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/RiskProducts/!svn/ver/33051/razor/trunk/PricingAdapters/PAVelocityEngine/RazorCompiler/templateLib/Template.stg
+END
+Razor.stg
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/RiskProducts/!svn/ver/33597/razor/trunk/PricingAdapters/PAVelocityEngine/RazorCompiler/templateLib/Razor.stg
+END
+StochasticProcess.h
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/RiskProducts/!svn/ver/32759/razor/trunk/PricingAdapters/PAVelocityEngine/RazorCompiler/templateLib/StochasticProcess.h
+END
+targetver.h
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/RiskProducts/!svn/ver/32759/razor/trunk/PricingAdapters/PAVelocityEngine/RazorCompiler/templateLib/targetver.h
+END
+stdafx.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/RiskProducts/!svn/ver/32759/razor/trunk/PricingAdapters/PAVelocityEngine/RazorCompiler/templateLib/stdafx.cpp
+END
+VCProject.stg
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/RiskProducts/!svn/ver/36915/razor/trunk/PricingAdapters/PAVelocityEngine/RazorCompiler/templateLib/VCProject.stg
+END
+Functions.h
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/RiskProducts/!svn/ver/39262/razor/trunk/PricingAdapters/PAVelocityEngine/RazorCompiler/templateLib/Functions.h
+END
+build.xml
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/RiskProducts/!svn/ver/32759/razor/trunk/PricingAdapters/PAVelocityEngine/RazorCompiler/templateLib/build.xml
+END
